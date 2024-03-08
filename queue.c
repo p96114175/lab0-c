@@ -177,7 +177,7 @@ void q_reverseK(struct list_head *head, int k)
     if (!head)
         return;
     struct list_head *node, *safe, head_to, *head_from = head;
-    int count = 0;
+    unsigned char count = 0;
     INIT_LIST_HEAD(&head_to);
     list_for_each_safe (node, safe, head) {
         count++;
@@ -327,7 +327,7 @@ static struct list_head *list_merge(list_cmp_func_t cmp,
                                     struct list_head *a,
                                     struct list_head *b)
 {
-    struct list_head *head, **tail = &head;
+    struct list_head *head = NULL, **tail = &head;
 
     for (;;) {
         /* if equal, take 'a' -- important for sort stability */
