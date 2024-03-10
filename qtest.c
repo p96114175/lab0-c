@@ -85,7 +85,7 @@ typedef enum {
 } position_t;
 /* Forward declarations */
 static bool q_show(int vlevel);
-
+void q_shuffle(struct list_head *);
 static bool do_free(int argc, char *argv[])
 {
     if (argc != 1) {
@@ -1011,6 +1011,23 @@ static bool do_next(int argc, char *argv[])
 
     return q_show(0);
 }
+static bool do_shuffle(int argc, char *argv[])
+{
+    if (!current || !current->q) {
+        report(3, "Warning: Calling shuffle on null queue");
+        return false;
+    }
+    if (q_size(current->q) < 2)
+        report(3, "Warning: Calling shuffle on null queue");
+    error_check();
+    set_noallocate_mode(true);
+    if (current && exception_setup(true))
+        q_shuffle(current->q);
+    exception_cancel();
+    set_noallocate_mode(false);
+
+    return q_show(0);
+}
 
 static void console_init()
 {
@@ -1052,6 +1069,7 @@ static void console_init()
                 "");
     ADD_COMMAND(reverseK, "Reverse the nodes of the queue 'K' at a time",
                 "[K]");
+    ADD_COMMAND(shuffle, "Fisher-Yates shuffle Algorithm", "");
     add_param("length", &string_length, "Maximum length of displayed string",
               NULL);
     add_param("malloc", &fail_probability, "Malloc failure probability percent",

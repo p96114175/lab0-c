@@ -14,6 +14,10 @@
 struct list_head *q_new()
 {
     struct list_head *new_node = malloc(sizeof(struct list_head));
+    if (!new_node) {
+        free(new_node);
+        return NULL;
+    }
     INIT_LIST_HEAD(new_node);
     return new_node;
 }
@@ -256,6 +260,13 @@ void _q_sort(struct list_head *head, bool descend)
     cur->next = head;
     head->prev = cur;
 }
+void q_sort(struct list_head *head, bool descend)
+{
+    list_sort(head, list_cmp);
+    if (descend)
+        q_reverse(head);
+}
+
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
 int q_ascend(struct list_head *head)
@@ -314,9 +325,39 @@ int q_merge(struct list_head *head, bool descend)
     return init->size;
 }
 
-void q_sort(struct list_head *head, bool descend)
+static inline void list_swap(struct list_head *a, struct list_head *b)
 {
-    list_sort(head, list_cmp);
-    if (descend)
-        q_reverse(head);
+    if (list_empty(a) && list_empty(b))
+        return;
+    struct list_head *b_positon = b->prev;
+    list_del(b);
+    b->next = a->next;
+    b->prev = a->prev;
+    b->next->prev = b;
+    b->prev->next = b;
+    if (b_positon == a)
+        b_positon = b;
+    list_add(a, b_positon);
+}
+/* Fisher-Yates shuffle Algorithm */
+bool q_shuffle(struct list_head *head)
+{
+    if (!head || list_empty(head))
+        return false;
+    struct list_head *curr = head->next;
+    int size = q_size(head);
+    while (size > 1) {
+        int random = rand() % size;
+        struct list_head *temp = curr->prev;
+        struct list_head *old = curr;
+        while (random--) {  // find the random node.
+            old = old->next;
+        }
+        if (curr != old)
+            list_swap(curr, old);  // Exchange elements.
+        if (temp != old)
+            curr = temp;
+        size--;
+    }
+    return true;
 }
