@@ -249,7 +249,7 @@ void q_sort(struct list_head *head, bool descend)
 {
     if (!head || list_empty(head))
         return;
-    shuffle(head);
+    // shuffle(head);
     head->prev->next = NULL;
     head->next = q_divide(head->next, descend);
     struct list_head *cur = head, *safe = head->next;
@@ -263,7 +263,7 @@ void q_sort(struct list_head *head, bool descend)
 }
 void _q_sort(struct list_head *head, bool descend)
 {
-    shuffle(head);
+    // shuffle(head);
     list_sort(head, list_cmp);
     if (descend)
         q_reverse(head);
@@ -350,5 +350,5 @@ bool q_shuffle(struct list_head *head)
                   list_entry(old, element_t, list));  // Exchange elements.
         size--;
     }
-    return;
+    return true;
 }
