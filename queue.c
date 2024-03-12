@@ -245,10 +245,11 @@ struct list_head *q_divide(struct list_head *head, bool descend)
 
 
 /* Sort elements of queue in ascending order */
-void _q_sort(struct list_head *head, bool descend)
+void q_sort(struct list_head *head, bool descend)
 {
     if (!head || list_empty(head))
         return;
+    shuffle(head);
     head->prev->next = NULL;
     head->next = q_divide(head->next, descend);
     struct list_head *cur = head, *safe = head->next;
@@ -260,8 +261,9 @@ void _q_sort(struct list_head *head, bool descend)
     cur->next = head;
     head->prev = cur;
 }
-void q_sort(struct list_head *head, bool descend)
+void _q_sort(struct list_head *head, bool descend)
 {
+    shuffle(head);
     list_sort(head, list_cmp);
     if (descend)
         q_reverse(head);
@@ -325,39 +327,28 @@ int q_merge(struct list_head *head, bool descend)
     return init->size;
 }
 
-static inline void list_swap(struct list_head *a, struct list_head *b)
+static inline void list_swap(element_t *a, element_t *b)
 {
-    if (list_empty(a) && list_empty(b))
-        return;
-    struct list_head *b_positon = b->prev;
-    list_del(b);
-    b->next = a->next;
-    b->prev = a->prev;
-    b->next->prev = b;
-    b->prev->next = b;
-    if (b_positon == a)
-        b_positon = b;
-    list_add(a, b_positon);
+    char *t = a->value;
+    a->value = b->value;
+    b->value = t;
 }
 /* Fisher-Yates shuffle Algorithm */
 bool q_shuffle(struct list_head *head)
 {
-    if (!head || list_empty(head))
+    if (!head || list_empty(head) || list_is_singular(head))
         return false;
-    struct list_head *curr = head->next;
+    struct list_head *new = head->prev;
+    struct list_head *old = head;
     int size = q_size(head);
     while (size > 1) {
         int random = rand() % size;
-        struct list_head *temp = curr->prev;
-        struct list_head *old = curr;
         while (random--) {  // find the random node.
             old = old->next;
         }
-        if (curr != old)
-            list_swap(curr, old);  // Exchange elements.
-        if (temp != old)
-            curr = temp;
+        list_swap(list_entry(new, element_t, list),
+                  list_entry(old, element_t, list));  // Exchange elements.
         size--;
     }
-    return true;
+    return;
 }
