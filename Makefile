@@ -6,6 +6,7 @@ CFLAGS += -Wvla
 
 GIT_HOOKS := .git/hooks/applied
 DUT_DIR := dudect
+TTT_AGENTS_DIR := ttt_agents
 all: $(GIT_HOOKS) qtest
 
 tid := 0
@@ -44,6 +45,7 @@ OBJS := qtest.o report.o console.o harness.o queue.o \
         game.o \
 		zobrist.o \
 		mt19937-64.o \
+		ttt_agents/negamax.o \
 
 deps := $(OBJS:%.o=.%.o.d)
 
@@ -53,6 +55,7 @@ qtest: $(OBJS)
 
 %.o: %.c
 	@mkdir -p .$(DUT_DIR)
+	@mkdir -p .$(TTT_AGENTS_DIR)
 	$(VECHO) "  CC\t$@\n"
 	$(Q)$(CC) -o $@ $(CFLAGS) -c -MMD -MF .$@.d $<
 
@@ -80,6 +83,7 @@ valgrind: valgrind_existence
 clean:
 	rm -f $(OBJS) $(deps) *~ qtest /tmp/qtest.*
 	rm -rf .$(DUT_DIR)
+	rm -rf .$(TTT_AGENTS_DIR)
 	rm -rf *.dSYM
 	(cd traces; rm -f *~)
 
