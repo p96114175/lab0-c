@@ -24,6 +24,7 @@
 #include "game.h"
 #include "list.h"
 #include "random.h"
+#include "ttt_agents/mcts.h"
 #include "ttt_agents/negamax.h"
 
 /* Shannon entropy */
@@ -1117,17 +1118,6 @@ static bool do_ttt(int argc, char *argv[])
     char turn = 'X';
     char ai = 'O';
 
-#ifdef USE_RL
-    rl_agent_t agent;
-    unsigned int state_num = 1;
-    CALC_STATE_NUM(state_num);
-    init_rl_agent(&agent, state_num, 'O');
-    load_model(&agent, state_num, MODEL_NAME);
-#elif defined(USE_MCTS)
-    // A routine for initializing MCTS is not required.
-#else
-    negamax_init();
-#endif
     while (1) {
         char win = check_win(table);
         if (win == 'D') {
@@ -1141,22 +1131,11 @@ static bool do_ttt(int argc, char *argv[])
         }
 
         if (turn == ai) {
-#ifdef USE_RL
-            int move = play_rl(table, &agent);
-            record_move(move);
-#elif defined(USE_MCTS)
             int move = mcts(table, ai);
             if (move != -1) {
                 table[move] = ai;
                 record_move(move);
             }
-#else
-            int move = negamax_predict(table, ai).move;
-            if (move != -1) {
-                table[move] = ai;
-                record_move(move);
-            }
-#endif
         } else {
             draw_board(table);
             int move;
