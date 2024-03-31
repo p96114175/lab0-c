@@ -27,10 +27,11 @@
 #include "ttt_agents/mcts.h"
 #include "ttt_agents/negamax.h"
 
+
+
 /* Shannon entropy */
 extern double shannon_entropy(const uint8_t *input_data);
 extern int show_entropy;
-
 /* Our program needs to use regular malloc/free */
 #define INTERNAL 1
 #include "harness.h"
@@ -78,6 +79,8 @@ static int fail_count = 0;
 static int string_length = MAXSTRING;
 
 static int descend = 0;
+/* Define aivsai variable for ai mode*/
+static int aivsai = 0;
 
 #define MIN_RANDSTR_LEN 5
 #define MAX_RANDSTR_LEN 10
@@ -1117,7 +1120,7 @@ static bool do_ttt(int argc, char *argv[])
     memset(table, ' ', N_GRIDS);
     char turn = 'X';
     char ai = 'O';
-
+    negamax_init();
     while (1) {
         char win = check_win(table);
         if (win == 'D') {
@@ -1134,6 +1137,12 @@ static bool do_ttt(int argc, char *argv[])
             int move = mcts(table, ai);
             if (move != -1) {
                 table[move] = ai;
+                record_move(move);
+            }
+        } else if (aivsai) {
+            int move = negamax_predict(table, ai).move;
+            if (move != -1) {
+                table[move] = turn;
                 record_move(move);
             }
         } else {
@@ -1197,6 +1206,7 @@ static void console_init()
                 "[K]");
     ADD_COMMAND(shuffle, "Fisher-Yates shuffle Algorithm", "");
     ADD_COMMAND(ttt, "Start my tic-tac-toe", "");
+    add_param("aivsai", &aivsai, "tic-tac-toe between AIs", NULL);
     add_param("length", &string_length, "Maximum length of displayed string",
               NULL);
     add_param("malloc", &fail_probability, "Malloc failure probability percent",
