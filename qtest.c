@@ -1159,6 +1159,14 @@ static bool do_ttt(int argc, char *argv[])
             record_move(move);
         }
         turn = turn == 'X' ? 'O' : 'X';
+
+        /* Show the current time for game*/
+        draw_board(table);
+        time_t rawtime;
+        struct tm *timeinfo;
+        time(&rawtime);
+        timeinfo = localtime(&rawtime);
+        printf("Current time : %s", asctime(timeinfo));
     }
     print_moves();
 
